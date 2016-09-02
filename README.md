@@ -22,6 +22,20 @@ def index
 end
 ```
 
+## Using Caddy with Spring (in development)
+
+For testing Caddy in development with Spring, you need to have Caddy start after fork:
+
+```ruby
+# in your caddy.rb initializer, perhaps
+
+if Rails.env.development?
+  Spring.after_fork do
+    Caddy.start
+  end
+end
+```
+
 ## Give it to me!
 
 Add this line to your application's Gemfile:
