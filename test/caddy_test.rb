@@ -35,6 +35,7 @@ class CaddyTest < Minitest::Test
     sleep(0.1)
     Caddy.stop
     Caddy.restart
+    sleep(0.1)
 
     assert_equal "baz", Caddy[:foo]
   end
