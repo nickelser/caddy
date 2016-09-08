@@ -88,6 +88,8 @@ class CaddyTest < Minitest::Test
     sleep(2)
 
     assert_kind_of Concurrent::TimeoutError, timed_out
+    Caddy.stop
+    sleep(1.5)
   end
 
   def test_no_handler_timeout
@@ -95,6 +97,8 @@ class CaddyTest < Minitest::Test
     Caddy.refresh_interval = 0.5
     Caddy.start
     sleep(2)
+    Caddy.stop
+    sleep(1.5)
   end
 
   def test_no_handler
