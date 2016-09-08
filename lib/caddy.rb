@@ -14,6 +14,7 @@ module Caddy
   @task = nil
   @refresh_interval = DEFAULT_REFRESH_INTERVAL
   @_started_pid = nil
+  @_cache = nil
 
   def self.[](k)
     cache[k]
@@ -21,9 +22,9 @@ module Caddy
 
   def self.cache
     raise "Please run `Caddy.start` before attempting to access the cache" unless @task
-    raise "Caddy cache access before initial load; allow some more time for your app to start up" unless @task.value
+    raise "Caddy cache access before initial load; allow some more time for your app to start up" unless @_cache
 
-    @task.value
+    @_cache
   end
 
   def self.start
@@ -47,7 +48,14 @@ module Caddy
       run_now: true,
       execution_interval: interval,
       timeout_interval: timeout_interval
-    ) { refresher.call }
+    ) do
+      begin
+        @_cache = refresher.call
+        @_cache.freeze if @_cache.respond_to?(:freeze)
+      rescue
+        raise
+      end
+    end
 
     @task.add_observer(Caddy::TaskObserver.new)
     @task.execute

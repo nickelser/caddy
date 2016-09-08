@@ -6,6 +6,7 @@ class CaddyTest < Minitest::Test
     Caddy.refresher = -> {}
     Caddy.refresh_interval = 30
     Caddy.error_handler = nil
+    sleep(0.05)
   end
 
   def test_basic_lookup
@@ -27,6 +28,20 @@ class CaddyTest < Minitest::Test
     sleep(3)
 
     assert_operator Caddy[:baz], :>=, 2
+  end
+
+  def test_stale_value
+    ran_once = false
+    Caddy.refresher = lambda do
+      raise "boom" if ran_once
+      ran_once = true
+      {baz: "bizz"}
+    end
+    Caddy.refresh_interval = 2
+    Caddy.start
+    sleep(3)
+
+    assert_equal "bizz", Caddy[:baz]
   end
 
   def test_restart
@@ -65,10 +80,21 @@ class CaddyTest < Minitest::Test
   end
 
   def test_timeout
-    Caddy.refresher = -> { sleep 5 }
-    Caddy.refresh_interval = 1
+    timed_out = nil
+    Caddy.refresher = -> { sleep 1 }
+    Caddy.error_handler = -> (ex) { timed_out = ex }
+    Caddy.refresh_interval = 0.5
     Caddy.start
-    sleep(0.1)
+    sleep(2)
+
+    assert_kind_of Concurrent::TimeoutError, timed_out
+  end
+
+  def test_no_handler_timeout
+    Caddy.refresher = -> { sleep 1 }
+    Caddy.refresh_interval = 0.5
+    Caddy.start
+    sleep(2)
   end
 
   def test_no_handler

@@ -1,6 +1,6 @@
 # Caddy [![Build Status](https://travis-ci.org/nickelser/caddy.svg?branch=master)](https://travis-ci.org/nickelser/caddy) [![Code Climate](https://codeclimate.com/github/nickelser/caddy/badges/gpa.svg)](https://codeclimate.com/github/nickelser/caddy) [![Test Coverage](https://codeclimate.com/github/nickelser/caddy/badges/coverage.svg)](https://codeclimate.com/github/nickelser/caddy) [![Gem Version](https://badge.fury.io/rb/caddy.svg)](http://badge.fury.io/rb/caddy)
 
-Caddy is an asynchronously updated store that is updated on an interval to store objects that you can access quickly during requests. The cache refresher function can be as slow as you would like and it will not affect your request-time performance.
+Caddy is an asynchronously updated store that is updated on an interval to store objects that you can access quickly during requests. The cache refresher function can be as slow as you would like and it will not affect your request-time performance. Caddy is great for storing information like feature flags -- accessed extremely frequently during many requests, updated very rarely and usually safe to be stale by some amount.
 
 It's powered by [concurrent-ruby](https://github.com/ruby-concurrency/concurrent-ruby), a battle-tested and comprehensive thread-based (& thread-safe) concurrency library.
 
@@ -13,17 +13,16 @@ Caddy.refresher = lambda do
   }
 end
 
-Caddy.refresh_interval = 5.minutes # default is 60 seconds
+Caddy.refresh_interval = 30.seconds # default is 60 seconds
 
-# ... after your application forks
+# ... after your application forks (see the guide below for Unicorn, Puma & Spring)
 Caddy.start
 
 # ... in a controller
 def index
-  # the Caddy requests are instant, and are up-to-date (as of 5 minutes ago, as specified above)
-  # you could use this for high-level feature flags, cache dumping
-  if Caddy[:flags][:fuzz_bizz] # Caddy provides a convenience method to access the cache by key; you can also access
-                               # it directly with Caddy.cache[:flags][...]
+  # Caddy provides a convenience method to access the cache by key; you can also access
+  # what your refresher returns directly with Caddy.cache[:flags][...]
+  if Caddy[:flags][:fuzz_bizz]
     Rails.cache.fetch("#{Caddy[:cache_keys][:global_key]}/#{Caddy[:cache_keys][:index_key]}/foo/bar") do
       # wonderful things happen here
     end
@@ -33,7 +32,7 @@ end
 
 ## Using Caddy with Unicorn
 
-You need to start Caddy after fork:
+Start Caddy after fork:
 
 ```ruby
 # in your unicorn.rb initializer
@@ -46,7 +45,7 @@ end
 
 ## Using Caddy with Puma
 
-Similarly, after work boot:
+Start Caddy after the worker boots:
 
 ```ruby
 # in your puma.rb initializer
@@ -59,7 +58,7 @@ end
 
 ## Using Caddy with Spring
 
-In the same vein, with developing with Spring, you need to have Caddy start after fork:
+Start Caddy after fork:
 
 ```ruby
 # in your caddy.rb initializer, perhaps
