@@ -54,23 +54,27 @@ class CaddyTest < Minitest::Test
     Caddy.refresher = -> { raise "boom" }
     Caddy.error_handler = -> (_) { raise "boomboom" }
     Caddy.start
+    sleep(0.1)
   end
 
   def test_bad_error_handler
     Caddy.refresher = -> { raise "boom" }
     Caddy.error_handler = "no"
     Caddy.start
+    sleep(0.1)
   end
 
   def test_timeout
     Caddy.refresher = -> { sleep 5 }
     Caddy.refresh_interval = 1
     Caddy.start
+    sleep(0.1)
   end
 
   def test_no_handler
     Caddy.refresher = -> { raise "boom" }
     Caddy.start
+    sleep(0.1)
   end
 
   def test_requires_refesher
