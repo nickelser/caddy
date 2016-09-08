@@ -1,0 +1,39 @@
+digraph G {
+  label="Caddy Architecture"
+  labelloc="top"
+  fontsize=20
+  fontname="Helvetica Neue"
+  node [shape="ellipse", style="filled", fontname="Helvetica Neue"]
+  edge [fontname="Helvetica Neue"]
+  peripheries=0
+  rankdir="LR"
+  subgraph clusterClient {
+    bgcolor="#d0c0a0"
+    fontsize=16
+    label="Client"
+    Browser
+  }
+  subgraph clusterServer {
+    bgcolor="#d0c0a0"
+    fontsize=16
+    label="Server"
+    subgraph clusterApp {
+      bgcolor="#b02b2c"
+      label="Ruby Process"
+      App
+      subgraph clusterCaddy {
+        bgcolor="#b02b2c"
+        label=""
+        Caddy
+      }
+    }
+    "Etc."
+    Database
+    "Slow Service"
+  }
+  Browser -> App [dir="both"]
+  App -> Caddy [dir="both"]
+  Caddy -> Database [label="Async Refresh", style="dotted", dir="both"]
+  Caddy -> "Slow Service" [style="dotted", dir="both"]
+  Caddy -> "Etc." [style="dotted", dir="both"]
+}
