@@ -29,6 +29,16 @@ class CaddyTest < Minitest::Test
     assert_operator Caddy[:baz], :>=, 2
   end
 
+  def test_restart
+    Caddy.refresher = -> { {foo: "baz"} }
+    Caddy.start
+    sleep(0.1)
+    Caddy.stop
+    Caddy.restart
+
+    assert_equal "baz", Caddy[:foo]
+  end
+
   def test_error_handling
     reported = nil
     Caddy.refresher = -> { raise "boom" }

@@ -60,4 +60,8 @@ module Caddy
   def self.stop
     @task.shutdown if @task && @task.running?
   end
+
+  def self.restart
+    stop || start
+  end
 end
