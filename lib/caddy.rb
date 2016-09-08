@@ -37,7 +37,7 @@ module Caddy
       raise "Please run `Caddy.start` *after* forking, as the refresh thread will get killed after fork"
     end
 
-    jitter_amount = [1, refresh_interval * REFRESH_INTERVAL_JITTER_PCT].max
+    jitter_amount = [0.5, refresh_interval * REFRESH_INTERVAL_JITTER_PCT].max
     interval = refresh_interval + rand(-jitter_amount...jitter_amount)
     timeout_interval = [interval - 1, 0.1].max
 

@@ -5,6 +5,7 @@ class CaddyTest < Minitest::Test
     Caddy.stop
     Caddy.refresher = -> {}
     Caddy.refresh_interval = 30
+    Caddy.error_handler = nil
   end
 
   def test_basic_lookup
@@ -41,6 +42,23 @@ class CaddyTest < Minitest::Test
   def test_incepted_error_handling
     Caddy.refresher = -> { raise "boom" }
     Caddy.error_handler = -> (_) { raise "boomboom" }
+    Caddy.start
+  end
+
+  def test_bad_error_handler
+    Caddy.refresher = -> { raise "boom" }
+    Caddy.error_handler = "no"
+    Caddy.start
+  end
+
+  def test_timeout
+    Caddy.refresher = -> { sleep 5 }
+    Caddy.refresh_interval = 1
+    Caddy.start
+  end
+
+  def test_no_handler
+    Caddy.refresher = -> { raise "boom" }
     Caddy.start
   end
 
