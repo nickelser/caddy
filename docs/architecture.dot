@@ -2,6 +2,7 @@ digraph G {
   label="Caddy Architecture"
   labelloc="top"
   fontsize=20
+  graph [label="kudos to sferik for the diagram", labelloc=b, labeljust=r, fontsize=10]
   fontname="Helvetica Neue"
   node [shape="ellipse", style="filled", fontname="Helvetica Neue"]
   edge [fontname="Helvetica Neue"]

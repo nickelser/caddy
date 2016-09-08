@@ -4,6 +4,8 @@ Caddy is an asynchronously updated store that is updated on an interval to store
 
 It's powered by [concurrent-ruby](https://github.com/ruby-concurrency/concurrent-ruby), a battle-tested and comprehensive thread-based (& thread-safe) concurrency library.
 
+![Architecture Diagram](https://rawgit.com/nickelser/caddy/master/docs/architecture.svg)
+
 ```ruby
 # in your initializers (caddy.rb would be a wonderful name)
 Caddy.refresher = lambda do
@@ -13,7 +15,8 @@ Caddy.refresher = lambda do
   }
 end
 
-Caddy.refresh_interval = 30.seconds # default is 60 seconds
+Caddy.refresh_interval = 30.seconds # default is 60 seconds; the actual amount is smoothed slightly
+                                    # to avoid a stampeding herd of refreshes
 
 # ... after your application forks (see the guide below for Unicorn, Puma & Spring)
 Caddy.start
