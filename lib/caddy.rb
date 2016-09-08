@@ -1,81 +1,63 @@
 # frozen_string_literal: true
 require "caddy/version"
+require "caddy/task_observer"
 require "concurrent/timer_task"
 
 module Caddy
   class << self
-    attr_accessor :refresher, :refresher_error_handler
-    attr_writer :refresh_interval
+    attr_accessor :refresher, :error_handler, :refresh_interval
   end
 
   DEFAULT_REFRESH_INTERVAL = 60
   REFRESH_INTERVAL_JITTER_PCT = 0.15
 
+  @task = nil
+  @refresh_interval = DEFAULT_REFRESH_INTERVAL
+  @_started_pid = nil
+
   def self.[](k)
-    raise "Please run `Caddy.start` before attempting to access values" unless @task
-    raise "Caddy variable access before initial load; allow some more time for your app to start up" unless @task.value
-    @task.value[k]
+    cache[k]
+  end
+
+  def self.cache
+    raise "Please run `Caddy.start` before attempting to access the cache" unless @task
+    raise "Caddy cache access before initial load; allow some more time for your app to start up" unless @task.value
+
+    @task.value
   end
 
   def self.start
-    unless refresher
+    unless refresher && refresher.respond_to?(:call)
       raise "Please set your cache refresher via `Caddy.refresher = -> { <code that returns a value> }`"
+    end
+
+    raise "`Caddy.refresh_interval` must be > 0" unless refresh_interval > 0
+
+    if @_started_pid && $$ != @_started_pid
+      raise "Please run `Caddy.start` *after* forking, as the refresh thread will get killed after fork"
     end
 
     jitter_amount = [1, refresh_interval * REFRESH_INTERVAL_JITTER_PCT].max
     interval = refresh_interval + rand(-jitter_amount...jitter_amount)
+    timeout_interval = [interval - 1, 0.1].max
 
-    task = Concurrent::TimerTask.new(
+    stop # stop any existing task from running
+
+    @task = Concurrent::TimerTask.new(
       run_now: true,
       execution_interval: interval,
-      timeout_interval: interval - 1) { refresher.call }
+      timeout_interval: timeout_interval
+    ) { refresher.call }
 
-    task.add_observer(InternalCaddyTaskObserver.new)
-    task.execute
+    @task.add_observer(Caddy::TaskObserver.new)
+    @task.execute
 
-    _stop_internal # stop any existing task from running
+    @_started_pid = $$
 
-    @task = task # and transfer over the new task
+    @task.running?
   end
 
   def self.stop
-    raise "Please run `Caddy.start` before running `Caddy.stop`" unless @task
-
-    _stop_internal
-  end
-
-  def self.refresh_interval
-    @refresh_interval || DEFAULT_REFRESH_INTERVAL
-  end
-
-  private_class_method def self._stop_internal
     @task.shutdown if @task && @task.running?
-  end
-
-  class InternalCaddyTaskObserver
-    def update(time, _, boom)
-      return unless boom
-
-      if Caddy.refresher_error_handler
-        if Caddy.refresher_error_handler.respond_to?(:call)
-          begin
-            Caddy.refresher_error_handler.call(boom)
-          rescue => incepted_boom
-            STDERR.puts "(#{time}) Caddy error handler itself errored: #{incepted_boom}"
-          end
-        else
-          # rubocop:disable Style/StringLiterals
-          STDERR.puts 'Caddy error handler not callable. Please set the error handler like:'\
-                      ' `Caddy.refresher_error_handler = -> (e) { puts "#{e}" }`'
-          # rubocop:enable Style/StringLiterals
-
-          STDERR.puts "(#{time}) Caddy refresher failed with error #{boom}"
-        end
-      elsif boom.is_a?(Concurrent::TimeoutError)
-        STDERR.puts "(#{time}) Caddy refresher timed out"
-      else
-        STDERR.puts "(#{time}) Caddy refresher failed with error #{boom}"
-      end
-    end
   end
 end

@@ -18,8 +18,11 @@ Gem::Specification.new do |s|
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.require_paths = ["lib"]
 
+  s.required_ruby_version = "~> 2.0"
+
   s.add_dependency "concurrent-ruby"
 
   s.add_development_dependency "rake", "~> 10.5"
   s.add_development_dependency "minitest", "~> 5.0"
+  s.add_development_dependency "codeclimate-test-reporter", "~> 0.4.7"
 end
