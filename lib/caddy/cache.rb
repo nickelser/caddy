@@ -19,6 +19,7 @@ module Caddy
 
     def cache
       raise "Please run `Caddy.start` before attempting to access the cache" unless @task && @task.running?
+      raise "Caddy cache access before initial load; allow some more time for your app to start up" unless @cache
 
       @cache
     end
