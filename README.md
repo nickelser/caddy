@@ -38,7 +38,9 @@ end
 
 ## Error handling
 
-As Caddy refreshers are run in threads, exceptions are not normally reported (except by default in the logs). To add a programmatic error handler:
+As Caddy refreshers are run in threads, exceptions are not normally reported (except by default in the logs). If your refresher errors out (or times out, which can happen if your refresher takes as long as your refresh interval to run) your error handler will be called and the cache value will remain what it was before it errored. This means your application may use stale values until your refresher stops erroring.
+
+To add a programmatic error handler:
 
 ```ruby
 Caddy[:flags].refresher = -> { SomeFlagService.fetch_flags }
