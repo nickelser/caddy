@@ -28,6 +28,8 @@ module Caddy
       raise "Please run `Caddy.start` *after* forking, as the refresh thread will get killed after fork"
     end
 
+    @caches.freeze
+
     @caches.values.each(&:start).all?
   end
 

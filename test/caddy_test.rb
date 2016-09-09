@@ -5,7 +5,7 @@ class CaddyTest < Minitest::Test
     Caddy.stop
     Caddy.error_handler = nil
 
-    [:test, :test_two].each do |k|
+    [:test, :test_two, :nope].each do |k|
       Caddy[k].refresher = -> {}
       Caddy[k].refresh_interval = 30
       Caddy[k].error_handler = nil
@@ -165,6 +165,12 @@ class CaddyTest < Minitest::Test
     Caddy[:test].refresher = nil
 
     assert_raises { Caddy.start }
+  end
+
+  def test_requires_initial_load
+    Caddy[:nope].refresher = -> { nil }
+
+    assert_raises { Caddy[:nope][:not_there] }
   end
 
   def test_requires_positive_interval
