@@ -8,15 +8,18 @@ It's powered by [concurrent-ruby](https://github.com/ruby-concurrency/concurrent
 
 ```ruby
 # in your initializers (caddy.rb would be a wonderful name)
-Caddy.refresher = lambda do
-  {
-    flags: SomeFlagService.fetch_flags, # this can take a few seconds; it won't block requests when you use it later
-    cache_keys: SomeCacheKeyService.cache_keys
-  }
+Caddy[:flags].refresher = lambda do
+  SomeFlagService.fetch_flags # this can take a few seconds; it won't block requests when you use it later
 end
 
-Caddy.refresh_interval = 30.seconds # default is 60 seconds; the actual amount is smoothed slightly
-                                    # to avoid a stampeding herd of refreshes
+# you can have multiple cache stores, refreshed at different intervals
+Caddy[:cache_keys].refresher = lambda do
+  SomeCacheKeyService.cache_keys
+end
+
+Caddy[:flags].refresh_interval = 30.seconds # default is 60 seconds; the actual amount is smoothed slightly
+                                            # to avoid a stampeding herd of refreshes
+Caddy[:cache_keys].refresh_interval = 5.minutes
 
 # ... after your application forks (see the guide below for Unicorn, Puma & Spring)
 Caddy.start
@@ -24,13 +27,23 @@ Caddy.start
 # ... in a controller
 def index
   # Caddy provides a convenience method to access the cache by key; you can also access
-  # what your refresher returns directly with Caddy.cache[:flags][...]
+  # what your refresher returns directly with Caddy[:flags].cache
   if Caddy[:flags][:fuzz_bizz]
     Rails.cache.fetch("#{Caddy[:cache_keys][:global_key]}/#{Caddy[:cache_keys][:index_key]}/foo/bar") do
       # wonderful things happen here
     end
   end
 end
+```
+
+## Error handling
+
+As Caddy refreshers are run in threads, exceptions are not normally reported (except by default in the logs). To add a programmatic error handler:
+
+```ruby
+Caddy[:flags].refresher = -> { SomeFlagService.fetch_flags }
+Caddy.error_handler = -> (exception) { ExceptionReporter.bad_thing_happened(exception) } # global (all caches) error handler
+Caddy[:flags].error_handler = -> (exception) { SpecificExceptionReporter.worse_thing_happened(exception) } # cache-specific error reporters also supported
 ```
 
 ## Using Caddy with Unicorn
