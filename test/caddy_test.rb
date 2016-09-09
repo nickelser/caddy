@@ -20,6 +20,7 @@ class CaddyTest < Minitest::Test
     sleep(0.1)
 
     assert_equal "bar", Caddy[:test][:foo]
+    assert_equal "bar", Caddy[:test].cache[:foo]
   end
 
   def test_basic_interval_updating
