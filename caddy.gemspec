@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = "~> 2.0"
 
-  s.add_dependency "concurrent-ruby"
+  s.add_dependency "concurrent-ruby", "~> 1.0"
 
   s.add_development_dependency "rake", "~> 10.5"
   s.add_development_dependency "minitest", "~> 5.0"

@@ -1,6 +1,7 @@
 ## 1.5.3
 
 - Remove now-pointless re-raise.
+- Pin concurrent-ruby to a reasonable version.
 
 ## 1.5.2
 
