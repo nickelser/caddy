@@ -1,3 +1,7 @@
+## 1.5.3
+
+- Remove now-pointless re-raise.
+
 ## 1.5.2
 
 - Further clarity in error messaging.

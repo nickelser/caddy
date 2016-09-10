@@ -42,11 +42,8 @@ module Caddy
         execution_interval: interval,
         timeout_interval: timeout_interval
       ) do
-        begin
-          @cache = refresher.call.freeze
-        rescue
-          raise
-        end
+        @cache = refresher.call.freeze
+        nil # no need to save the value internally to TimerTask
       end
 
       @task.add_observer(Caddy::TaskObserver.new(error_handler, @key))
