@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email         = ["nick.elser@gmail.com"]
   s.summary       = %q(Caddy gives you a auto-updating global cache to speed up requests.)
   s.description = <<-EOF
-    Caddy is an asynchronously updated store that is updated on an interval to store objects that you can access quickly during requests.
+    Caddy is an asynchronously refreshed cache that is updated on an interval to store objects that you can access quickly during requests.
 
     Caddy is great for storing information like feature flags -- accessed extremely frequently during many requests, updated relatively rarely and usually safe to be stale by some small duration.
   EOF

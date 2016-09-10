@@ -1,6 +1,6 @@
 # Caddy [![Build Status](https://travis-ci.org/nickelser/caddy.svg?branch=master)](https://travis-ci.org/nickelser/caddy) [![Code Climate](https://codeclimate.com/github/nickelser/caddy/badges/gpa.svg)](https://codeclimate.com/github/nickelser/caddy) [![Test Coverage](https://codeclimate.com/github/nickelser/caddy/badges/coverage.svg)](https://codeclimate.com/github/nickelser/caddy) [![Gem Version](https://badge.fury.io/rb/caddy.svg)](http://badge.fury.io/rb/caddy)
 
-Caddy is an asynchronously updated store that is updated on an interval to store objects that you can access quickly during requests.
+Caddy is an asynchronously refreshed cache that is updated on an interval to store objects that you can access quickly during requests.
 
 Caddy is great for storing information like feature flags -- accessed extremely frequently during many requests, updated relatively rarely and usually safe to be stale by some small duration.
 

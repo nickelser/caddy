@@ -1,3 +1,7 @@
+## 1.5.4
+
+- Some minor wording updates.
+
 ## 1.5.3
 
 - Remove now-pointless re-raise.
