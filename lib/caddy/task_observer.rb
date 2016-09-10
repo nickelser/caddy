@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module Caddy
-  class TaskObserver
+  class TaskObserver #:nodoc:
     def initialize(error_handler, cache_name)
       @error_handler = error_handler || Caddy.error_handler
       @cache_name = cache_name

@@ -1,8 +1,6 @@
 AllCops:
   Exclude:
     - .git/**/*
-    - tmp/**/*
-    - suo.gemspec
 
 Lint/DuplicateMethods:
   Enabled: true
