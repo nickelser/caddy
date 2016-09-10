@@ -1,3 +1,7 @@
+## 1.5.5
+
+- Add more detailed documentation/comments.
+
 ## 1.5.4
 
 - Some minor wording updates.
