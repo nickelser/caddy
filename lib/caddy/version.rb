@@ -1,4 +1,5 @@
 # frozen_string_literal: true
 module Caddy
-  VERSION = "1.5.5".freeze
+  # Current version
+  VERSION = "1.6.0".freeze
 end

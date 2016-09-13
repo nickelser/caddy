@@ -7,3 +7,13 @@ end
 
 require "minitest/autorun"
 require "caddy"
+
+ENV["RACK_ENV"] = ENV["RAILS_ENV"] = "test"
+
+$test_logger = begin
+  l = Logger.new(STDOUT)
+  l.level = Logger::ERROR
+  l
+end
+
+Caddy.logger = $test_logger
