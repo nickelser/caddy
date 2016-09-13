@@ -18,6 +18,7 @@ module Caddy
 
   @started_pid = nil
   @caches = Hash.new { |h, k| h[k] = Caddy::Cache.new(k) }
+  @needs_fork_check = !Concurrent::TimerSet.private_method_defined?(:ns_reset_if_forked)
 
   # Returns the cache object at a key.
   #
@@ -37,12 +38,7 @@ module Caddy
   # Caddy freezes the hash of caches at this point, so no more further caches can be
   # added after start.
   def self.start
-    if !@started_pid
-      @started_pid = $$
-    elsif @started_pid && $$ != @started_pid
-      # raise "Please run `Caddy.start` *after* forking, as the refresh thread will get killed after fork"
-    end
-
+    raise_if_forked if @needs_fork_check
     logger.info "Starting Caddy with refreshers: #{@caches.keys.join(', ')}"
 
     @caches.values.each(&:start).all?
@@ -72,6 +68,17 @@ module Caddy
           logger.formatter = -> (_, datetime, _, msg) { "#{datetime}: #{msg}\n" }
         end
       end
+    end
+  end
+
+  # TODO: when https://github.com/ruby-concurrency/concurrent-ruby/pull/573 is merged, remove this whole block
+  # or add a warning
+  # @private
+  def self.raise_if_forked
+    if !@started_pid
+      @started_pid = $$
+    elsif @started_pid && $$ != @started_pid
+      raise "Please run `Caddy.start` *after* forking, as the refresh thread will get killed after fork"
     end
   end
 end

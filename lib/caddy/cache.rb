@@ -16,8 +16,8 @@ module Caddy
     attr_accessor :refresh_interval
 
     # @!attribute error_handler
-    #   @return [Proc] if unset, defaults to the global error handler (see #{Caddy.error_handler}); called when exceptions or timeouts
-    #   happen within the refresher
+    #   @return [Proc] if unset, defaults to the global error handler (see #{Caddy.error_handler});
+    #   called when exceptions or timeouts happen within the refresher
     attr_accessor :error_handler
 
     # Create a new periodically updated cache.
@@ -43,8 +43,9 @@ module Caddy
       raise "Please run `Caddy.start` before attempting to access the cache" unless @task && @task.running?
 
       unless @cache
-        logger.warn "Caddy cache access of :#{@key} before initial load; doing synchronous load. Please allow some more time for your app to start up."
-        refresh_cache
+        logger.warn "Caddy cache access of :#{@key} before initial load; doing synchronous load."\
+                    "Please allow some more time for your app to start up."
+        refresh
       end
 
       @cache
@@ -74,7 +75,7 @@ module Caddy
         execution_interval: interval,
         timeout_interval: timeout_interval
       ) do
-        refresh_cache
+        refresh
         nil # no need for the {#Concurrent::TimerTask} to keep a reference to the value
       end
 
@@ -94,8 +95,11 @@ module Caddy
       @task.shutdown if @task && @task.running?
     end
 
-    def task
-      @task
+    # Updates the internal cache object.
+    #
+    # Freezes the result to avoid mutation errors.
+    def refresh
+      @cache = refresher.call.freeze
     end
 
     private
@@ -103,11 +107,6 @@ module Caddy
     # Delegates logging to the module logger
     def logger
       Caddy.logger
-    end
-
-    # Updates the internal cache object. We freeze the result to avoid mutation errors.
-    def refresh_cache
-      @cache = refresher.call.freeze
     end
   end
 end
